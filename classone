@@ -1,0 +1,56 @@
+import numpy as np 
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
+np.random.seed(12)
+num_observations = 500
+
+x1 = np.random.multivariate_normal([0,0],[[1,.75],[.75,1]],num_observations)
+x2 = np.random.multivariate_normal([1,4],[[1,.75],[.75,1]],num_observations)
+
+X = np.vstack((x1,x2)).astype(np.float32)
+Y = np.hstack((np.ones(num_observations), -np.ones(num_observations)))
+#print(Y)
+#print(X[1])
+#print(X[1][1])
+
+for i in range(1000):
+    if Y[i] == 1:
+        # 正样本点画为红色
+        plt.scatter(X[i][0], X[i][1], color="red",s=0.5)
+    else:
+        # 负样本点画黑色
+        plt.scatter(X[i][0], X[i][1], color="black",s=0.5)
+plt.xlabel('Feature 1')
+plt.ylabel('Feature 2')
+#plt.legend(loc = 'upper left')
+plt.title('Original Data')
+#plt.savefig('myfig')
+
+
+
+# plt.show()
+w = [0,0] # 初始化一下每个特征的权重
+b = 0 # 初始化截距
+lr = 0.001 # 梯度下降的步长
+
+for j in range(100): # 遍历个100次吧
+    wrong_nums = 0 # 分类错误的点的个数
+    for i in range(1000):
+        if Y[i] != np.sign(np.dot(w, X[i]) + b): # numpy.sign就是如果参数大于0返回1,如果参数小于0返回-1
+            wrong_nums += 1
+            w = w + lr * Y[i] * X[i] # 梯度下降的学习算法计算出来的w,由 w*x+b=0
+            b = b + lr * Y[i]
+    if wrong_nums == 0:
+        break
+
+def draw_line(w, b):
+    line_x1 = -3
+    line_y1 = -(b + w[0] * float(line_x1))/w[1]
+    # 因为 w1 * x[1] + w2 * x2 + b = 0,取y = x2，可得y=-(b + w1 * x1)/w1
+    line_x2 = 3
+    line_y2 = -(b + w[0] * float(line_x2))/w[1]
+    plt.plot([line_x1,line_x2], [line_y1,line_y2] ,'r')
+draw_line(w,b) # 划线
+plt.savefig('myfig')
